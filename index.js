@@ -13,13 +13,14 @@ app.use(express.json());
 //username=dorkarShop
 //password=pIP6gmNB07pJmLWE
 
-const uri = "mongodb+srv://dorkarShop:pIP6gmNB07pJmLWE@cluster0.yund2vi.mongodb.net/?retryWrites=true&w=majority";
+const uri = process.env.MONGODB_URL;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run(){
     try{
         const usersCollection = client.db('dorkarShop').collection('users');
 
+        //registration start
         app.post('/register',async(req,res)=>{
             const user = req.body;
             const { name, email, password,role } = user;
@@ -57,7 +58,8 @@ async function run(){
 
             // return new user
             res.status(201).json(createdUser);
-        })
+        });
+        //registration end
 
     }
     finally{
