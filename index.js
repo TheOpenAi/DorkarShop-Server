@@ -27,7 +27,7 @@ async function run() {
 
             // Validate user input
             if (!(email && password && name && role)) {
-                res.status(400).send("All input is required");
+                return res.status(400).send("All input is required");
             }
             const oldUser = await usersCollection.findOne({ email: email.toLowerCase() });
 
