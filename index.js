@@ -23,6 +23,7 @@ async function run() {
         //registration start
         app.post('/register', async (req, res) => {
             const user = req.body;
+            console.log(user);
             const { name, email, password, role } = user;
 
             // Validate user input
@@ -92,6 +93,15 @@ async function run() {
             }
             res.status(400).send("Invalid Credentials");
         });
+        // login end
+
+        //get all users by role
+        app.get('/users', async (req, res) => {
+            const role = req.query.role;
+            const query = { role: role };
+            const result = await usersCollection.find(query).toArray();
+            res.send(result);
+        })
     }
     finally {
 
