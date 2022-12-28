@@ -18,6 +18,8 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
+        const categoriesCollection = client.db('dorkarShop').collection('categories');
+        const productsCollection = client.db('dorkarShop').collection('products');
         const usersCollection = client.db('dorkarShop').collection('users');
 
         //registration start
@@ -100,6 +102,26 @@ async function run() {
             const role = req.query.role;
             const query = { role: role };
             const result = await usersCollection.find(query).toArray();
+            res.send(result);
+        });
+
+        //categories
+        app.get('/categories', async (req, res) => {
+            const query = {};
+            const categories = await categoriesCollection.find(query).toArray();
+            res.send(categories);
+        });
+        //get products by category name
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { category: id };
+            const product = await productsCollection.find(query).toArray();
+            res.send(product);
+        })
+        //save products
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await productsCollection.insertOne(product);
             res.send(result);
         })
     }
