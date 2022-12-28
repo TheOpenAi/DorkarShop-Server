@@ -12,17 +12,18 @@ app.use(express.json());
 
 //username=dorkarShop
 //password=pIP6gmNB07pJmLWE
-
-const uri = process.env.MONGODB_URL;
+const uri = "mongodb+srv://dorkarShop:pIP6gmNB07pJmLWE@cluster0.yund2vi.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run() {
     try {
         const usersCollection = client.db('dorkarShop').collection('users');
-
+        const prodcutsCollection = client.db('dorkarShop').collection('products');
+   
         //registration start
         app.post('/register', async (req, res) => {
-            const user = req.body;
+            const user = req.body ;
+            console.log(user);
             const { name, email, password, role } = user;
 
             // Validate user input
@@ -32,7 +33,7 @@ async function run() {
             const oldUser = await usersCollection.findOne({ email: email.toLowerCase() });
 
             if (oldUser) {
-                return res.status(409).send("User Already Exist. Please Login");
+                return res.status(409).send({message:"User Already Exist. Please Login"});
             }
             encryptedPassword = await bcrypt.hash(password, 10);
 
@@ -43,7 +44,7 @@ async function run() {
                 password: encryptedPassword,
                 role
             });
-
+            console.log();
             const token = jwt.sign(
                 { user_id: result._id, email },
                 process.env.TOKEN_KEY,
@@ -69,7 +70,7 @@ async function run() {
 
             // Validate user input
             if (!(email && password)) {
-                return res.status(400).send("All input is required");
+                return res.status(400).send({message:"All input is required"});
             }
             // Validate if user exist in our database
             const user = await usersCollection.findOne({ email });
@@ -90,9 +91,27 @@ async function run() {
                 // user
                 return res.status(200).json(user);
             }
-            res.status(400).send("Invalid Credentials");
+            res.status(400).send({message:"Invalid Credentials"});
         });
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const categori ={category:id};
+            console.log(categori);
+            const products = await prodcutsCollection.find(categori).toArray();
+            res.send(products);
+        });
+        app.get('/products', async (req, res) => {
+            const products = await prodcutsCollection.find({}).toArray();
+            res.send(products);
+        });
+        app.get('/productdetails/:id', async (req, res) => {
+            const id = req.params.id;
+            const product = await prodcutsCollection.findOne({ _id: ObjectId(id) });
+            res.send(product);
+        });
+ 
     }
+   
     finally {
 
     }
