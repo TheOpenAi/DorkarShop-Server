@@ -21,10 +21,10 @@ async function run() {
         const productsCollection = client.db('dorkarShop').collection('products');
         const usersCollection = client.db('dorkarShop').collection('users');
         const cartsCollection = client.db('dorkarShop').collection('carts');
-   
+
         //registration start
         app.post('/register', async (req, res) => {
-            const user = req.body ;
+            const user = req.body;
             console.log(user);
             const { name, email, password, role } = user;
 
@@ -35,7 +35,7 @@ async function run() {
             const oldUser = await usersCollection.findOne({ email: email.toLowerCase() });
 
             if (oldUser) {
-                return res.status(409).send({message:"User Already Exist. Please Login"});
+                return res.status(409).send({ message: "User Already Exist. Please Login" });
             }
             encryptedPassword = await bcrypt.hash(password, 10);
 
@@ -72,7 +72,7 @@ async function run() {
 
             // Validate user input
             if (!(email && password)) {
-                return res.status(400).send({message:"All input is required"});
+                return res.status(400).send({ message: "All input is required" });
             }
             // Validate if user exist in our database
             const user = await usersCollection.findOne({ email });
@@ -93,17 +93,23 @@ async function run() {
                 // user
                 return res.status(200).json(user);
             }
-            res.status(400).send({message:"Invalid Credentials"});
+            res.status(400).send({ message: "Invalid Credentials" });
         });
-        
+
         // login end
+
 
         //get all users by role
         app.get('/users', async (req, res) => {
             const role = req.query.role;
-            const query = { role: role };
-            const result = await usersCollection.find(query).toArray();
+            if (role) {
+                const query = { role: role };
+                const result = await usersCollection.find(query).toArray();
+                return res.send(result);
+            }
+            const result = await usersCollection.find({}).toArray();
             res.send(result);
+
         });
 
         //categories
@@ -167,9 +173,9 @@ async function run() {
             const result = await cartsCollection.deleteOne(query);
             res.send(result);
         });
-        
+
     }
-   
+
     finally {
 
     }
