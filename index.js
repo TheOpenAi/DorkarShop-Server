@@ -95,22 +95,7 @@ async function run() {
             }
             res.status(400).send({message:"Invalid Credentials"});
         });
-        app.get('/products/:id', async (req, res) => {
-            const id = req.params.id;
-            const categori ={category:id};
-            console.log(categori);
-            const products = await prodcutsCollection.find(categori).toArray();
-            res.send(products);
-        });
-        app.get('/products', async (req, res) => {
-            const products = await prodcutsCollection.find({}).toArray();
-            res.send(products);
-        });
-        app.get('/productdetails/:id', async (req, res) => {
-            const id = req.params.id;
-            const product = await prodcutsCollection.findOne({ _id: ObjectId(id) });
-            res.send(product);
-        });
+        
         // login end
 
         //get all users by role
@@ -127,6 +112,18 @@ async function run() {
             const categories = await categoriesCollection.find(query).toArray();
             res.send(categories);
         });
+
+        // get products 
+        app.get('/products', async (req, res) => {
+            const products = await prodcutsCollection.find({}).toArray();
+            res.send(products);
+        });
+        //get products by id
+        app.get('/productdetails/:id', async (req, res) => {
+            const id = req.params.id;
+            const product = await prodcutsCollection.findOne({ _id: ObjectId(id) });
+            res.send(product);
+        });
         //get products by category name
         app.get('/products/:id', async (req, res) => {
             const id = req.params.id;
@@ -139,7 +136,8 @@ async function run() {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
             res.send(result);
-        })
+        });
+        
     }
    
     finally {
