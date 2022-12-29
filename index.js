@@ -139,28 +139,29 @@ async function run() {
         });
 
         //carts
-        app.get('/carts', verifyJWT, async (req, res) => {
+        app.get('/carts', async (req, res) => {
             const email = req.query.email;
             const query = { email: email };
             const carts = await cartsCollection.find(query).toArray();
             res.send(carts);
         });
         //carts get by id
-        app.get('/carts/:id', verifyJWT, async (req, res) => {
+        app.get('/carts/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const cart = await cartsCollection.findOne(query);
             res.send(cart);
         });
 
-        app.post('/carts', verifyJWT, async (req, res) => {
+        app.post('/carts', async (req, res) => {
             const cart = req.body;
+            console.log(cart);
             const query = {};
             const result = await cartsCollection.insertOne(cart);
             res.send(result);
         });
         //carts delete
-        app.delete('/carts/:id', verifyJWT, async (req, res) => {
+        app.delete('/carts/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await cartsCollection.deleteOne(query);
