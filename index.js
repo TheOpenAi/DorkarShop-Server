@@ -27,6 +27,7 @@ async function run() {
         const productsCollection = client.db('dorkarShop').collection('products');
         const usersCollection = client.db('dorkarShop').collection('users');
         const cartsCollection = client.db('dorkarShop').collection('carts');
+        const ordersCollection = client.db('dorkarShop').collection('orders');
 
         //registration start
         app.post('/register', async (req, res) => {
@@ -125,15 +126,16 @@ async function run() {
             const orderedService = await productsCollection.findOne({ _id: ObjectId(order.productsId) })
             console.log(orderedService);
             // res.send(orderedService);
+            const transectionId = new ObjectId().toString();
 
 
             const data = {
                 total_amount: orderedService.price,
                 currency: 'BDT',
-                tran_id: new ObjectId().toString(), // use unique tran_id for each api call
-                success_url: 'http://localhost:3030/success',
-                fail_url: 'http://localhost:3030/fail',
-                cancel_url: 'http://localhost:3030/cancel',
+                tran_id: transectionId, // use unique tran_id for each api call
+                success_url: `http://localhost:5000/payment/success?transectionId=${transectionId}`,
+                fail_url: 'http://localhost:5000/payment/fail',
+                cancel_url: 'http://localhost:5000/payment/cancel',
                 ipn_url: 'http://localhost:3030/ipn',
                 shipping_method: 'Courier',
                 product_name: 'Computer.',
@@ -166,12 +168,38 @@ async function run() {
                 // Redirect the user to payment gateway
                 let GatewayPageURL = apiResponse.GatewayPageURL;
                 console.log(apiResponse);
+
+                ordersCollection.insertOne({
+                    ...order,
+                    price: orderedService.price,
+                    transectionId,
+                    paid: false,
+
+                });
                 // res.redirect(GatewayPageURL)
                 // console.log('Redirecting to: ', GatewayPageURL);
                 res.send({ url: GatewayPageURL, data: data });
             });
 
         });
+
+        app.post('/payment/success', async (req, res) => {
+            // console.log("success")
+            const { transectionId } = req.query;
+            // console.log(transectionId);
+            const result = await ordersCollection.updateOne(
+                { transectionId },
+                { $set: { paid: true, paidAt: new Date() } }
+            );
+
+            if (result.modifiedCount > 0) {
+                res.redirect(`http://localhost:3000/payment/success?transectionId=${transectionId}`)
+
+            }
+
+
+        });
+
 
 
 
