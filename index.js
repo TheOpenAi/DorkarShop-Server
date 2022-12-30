@@ -5,6 +5,7 @@ const SSLCommerzPayment = require('sslcommerz-lts')
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
+const { toast } = require('react-hot-toast');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -193,7 +194,12 @@ async function run() {
             );
 
             if (result.modifiedCount > 0) {
+
+
                 res.redirect(`http://localhost:3000/payment/success?transectionId=${transectionId}`)
+                // res.redirect(`http://localhost:3000/`)
+
+
 
             }
 
