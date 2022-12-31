@@ -128,13 +128,13 @@ async function run() {
             console.log(orderedService);
             // res.send(orderedService);
             const transectionId = new ObjectId().toString();
-
+            const productsId = order.productsId;
 
             const data = {
                 total_amount: orderedService.price,
                 currency: 'BDT',
                 tran_id: transectionId, // use unique tran_id for each api call
-                success_url: `http://localhost:5000/payment/success?transectionId=${transectionId}`,
+                success_url: `http://localhost:5000/payment/success?transectionId=${transectionId}&productsId=${productsId}`,
                 fail_url: `http://localhost:5000/payment/fail?transectionId=${transectionId}`,
                 cancel_url: 'http://localhost:5000/payment/cancel',
                 ipn_url: 'http://localhost:3030/ipn',
@@ -188,8 +188,15 @@ async function run() {
 
         app.post('/payment/success', async (req, res) => {
             // console.log("success")
-            const { transectionId } = req.query;
-            // console.log(transectionId);
+            const { transectionId, productsId } = req.query;
+            console.log(productsId);
+            console.log(req.query);
+
+            if (!transectionId) {
+                return res.redirect("http://localhost:3000/payment/fail");
+
+            }
+
             const result = await ordersCollection.updateOne(
                 { transectionId },
                 { $set: { paid: true, paidAt: new Date() } }
@@ -199,20 +206,33 @@ async function run() {
 
 
                 res.redirect(`http://localhost:3000/payment/success?transectionId=${transectionId}`)
+
                 // res.redirect(`http://localhost:3000/`)
 
-
+                const result = await productsCollection.updateOne({ _id: ObjectId(productsId) }, { $set: { paid: "true" } });
 
             }
 
 
         });
 
+
+
+
+
+
+
         app.post('/payment/fail', async (req, res) => {
 
             const { transectionId } = req.query;
 
             // console.log(transectionId);
+
+
+            if (!transectionId) {
+                return res.redirect("http://localhost:3000/payment/fail");
+
+            }
             const result = await ordersCollection.deleteOne({ transectionId });
 
             if (result.deletedCount) {
