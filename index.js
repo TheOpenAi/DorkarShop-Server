@@ -139,8 +139,8 @@ async function run() {
                 cancel_url: 'http://localhost:5000/payment/cancel',
                 ipn_url: 'http://localhost:3030/ipn',
                 shipping_method: 'Courier',
-                product_name: 'Computer.',
-                product_category: 'Electronic',
+                product_name: orderedService.model,
+                product_category: orderedService.category,
                 product_profile: 'general',
                 cus_name: 'Customer Name',
                 cus_email: 'customer@example.com',
@@ -161,8 +161,8 @@ async function run() {
                 ship_country: 'Bangladesh',
             };
 
-            console.log(data);
-            // res.send(data);
+            // console.log(data);
+
 
             const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
             sslcz.init(data).then(apiResponse => {
@@ -173,6 +173,8 @@ async function run() {
                 ordersCollection.insertOne({
                     ...order,
                     price: orderedService.price,
+                    category: orderedService.category,
+                    model: orderedService.model,
                     transectionId,
                     paid: false,
 
