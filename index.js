@@ -135,7 +135,7 @@ async function run() {
                 currency: 'BDT',
                 tran_id: transectionId, // use unique tran_id for each api call
                 success_url: `http://localhost:5000/payment/success?transectionId=${transectionId}`,
-                fail_url: 'http://localhost:5000/payment/fail',
+                fail_url: `http://localhost:5000/payment/fail?transectionId=${transectionId}`,
                 cancel_url: 'http://localhost:5000/payment/cancel',
                 ipn_url: 'http://localhost:3030/ipn',
                 shipping_method: 'Courier',
@@ -207,6 +207,27 @@ async function run() {
 
 
         });
+
+        app.post('/payment/fail', async (req, res) => {
+
+            const { transectionId } = req.query;
+
+            // console.log(transectionId);
+            const result = await ordersCollection.deleteOne({ transectionId });
+
+            if (result.deletedCount) {
+
+
+                res.redirect("http://localhost:3000/payment/fail");
+
+
+
+
+            }
+
+
+        });
+
 
 
         app.get('/orders/by-transaction-id/:id', async (req, res) => {
