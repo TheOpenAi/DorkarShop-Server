@@ -259,7 +259,6 @@ async function run() {
 
 
 
-
         //categories
         app.get('/categories', async (req, res) => {
             const query = {};
@@ -319,6 +318,19 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await cartsCollection.deleteOne(query);
+            res.send(result);
+        });
+        // seller products 
+        app.get('/sellerorder', async (req, res) => {
+            const query ={email:req.query.email};
+            console.log(query);
+            const result = await productsCollection.find(query).toArray();
+            res.send(result);
+        })
+        app.delete('/sellerorder/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(query);
             res.send(result);
         });
 
