@@ -134,7 +134,7 @@ async function run() {
                 total_amount: orderedService.price,
                 currency: 'BDT',
                 tran_id: transectionId, // use unique tran_id for each api call
-                success_url: `https://dorkar-shop-server-siamcse.vercel.app/payment/success?transectionId=${transectionId}`,
+                success_url: `http://localhost:5000/payment/success?transectionId=${transectionId}`,
                 fail_url: 'http://localhost:5000/payment/fail',
                 cancel_url: 'http://localhost:5000/payment/cancel',
                 ipn_url: 'http://localhost:3030/ipn',
@@ -204,6 +204,13 @@ async function run() {
             }
 
 
+        });
+
+
+        app.get('/orders/by-transaction-id/:id', async (req, res) => {
+            const { id } = req.params;
+            const order = await ordersCollection.findOne({ transectionId: id });
+            res.send(order);
         });
 
 
