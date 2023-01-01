@@ -5,6 +5,7 @@ const SSLCommerzPayment = require('sslcommerz-lts')
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
+const { toast } = require('react-hot-toast');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -127,19 +128,19 @@ async function run() {
             console.log(orderedService);
             // res.send(orderedService);
             const transectionId = new ObjectId().toString();
-
+            const productsId = order.productsId;
 
             const data = {
                 total_amount: orderedService.price,
                 currency: 'BDT',
                 tran_id: transectionId, // use unique tran_id for each api call
-                success_url: `https://dorkar-shop-server-siamcse.vercel.app/payment/success?transectionId=${transectionId}`,
-                fail_url: 'http://localhost:5000/payment/fail',
+                success_url: `http://localhost:5000/payment/success?transectionId=${transectionId}&productsId=${productsId}`,
+                fail_url: `http://localhost:5000/payment/fail?transectionId=${transectionId}`,
                 cancel_url: 'http://localhost:5000/payment/cancel',
                 ipn_url: 'http://localhost:3030/ipn',
                 shipping_method: 'Courier',
-                product_name: 'Computer.',
-                product_category: 'Electronic',
+                product_name: orderedService.model,
+                product_category: orderedService.category,
                 product_profile: 'general',
                 cus_name: 'Customer Name',
                 cus_email: 'customer@example.com',
@@ -160,8 +161,8 @@ async function run() {
                 ship_country: 'Bangladesh',
             };
 
-            console.log(data);
-            // res.send(data);
+            // console.log(data);
+
 
             const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
             sslcz.init(data).then(apiResponse => {
@@ -172,6 +173,8 @@ async function run() {
                 ordersCollection.insertOne({
                     ...order,
                     price: orderedService.price,
+                    category: orderedService.category,
+                    model: orderedService.model,
                     transectionId,
                     paid: false,
 
@@ -185,19 +188,72 @@ async function run() {
 
         app.post('/payment/success', async (req, res) => {
             // console.log("success")
-            const { transectionId } = req.query;
-            // console.log(transectionId);
+            const { transectionId, productsId } = req.query;
+            console.log(productsId);
+            console.log(req.query);
+
+            if (!transectionId) {
+                return res.redirect("http://localhost:3000/payment/fail");
+
+            }
+
             const result = await ordersCollection.updateOne(
                 { transectionId },
                 { $set: { paid: true, paidAt: new Date() } }
             );
 
             if (result.modifiedCount > 0) {
+
+
                 res.redirect(`http://localhost:3000/payment/success?transectionId=${transectionId}`)
+
+                // res.redirect(`http://localhost:3000/`)
+
+                const result = await productsCollection.updateOne({ _id: ObjectId(productsId) }, { $set: { paid: "true" } });
 
             }
 
 
+        });
+
+
+
+
+
+
+
+        app.post('/payment/fail', async (req, res) => {
+
+            const { transectionId } = req.query;
+
+            // console.log(transectionId);
+
+
+            if (!transectionId) {
+                return res.redirect("http://localhost:3000/payment/fail");
+
+            }
+            const result = await ordersCollection.deleteOne({ transectionId });
+
+            if (result.deletedCount) {
+
+
+                res.redirect("http://localhost:3000/payment/fail");
+
+
+
+
+            }
+
+
+        });
+
+
+
+        app.get('/orders/by-transaction-id/:id', async (req, res) => {
+            const { id } = req.params;
+            const order = await ordersCollection.findOne({ transectionId: id });
+            res.send(order);
         });
 
 
