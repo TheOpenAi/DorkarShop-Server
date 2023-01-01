@@ -122,6 +122,9 @@ async function run() {
 
 
         //for payment
+
+
+
         app.post('/orders', async (req, res) => {
             const order = req.body;
             const orderedService = await productsCollection.findOne({ _id: ObjectId(order.productsId) })
@@ -189,8 +192,8 @@ async function run() {
         app.post('/payment/success', async (req, res) => {
             // console.log("success")
             const { transectionId, productsId } = req.query;
-            console.log(productsId);
-            console.log(req.query);
+            // console.log(productsId);
+            // console.log(req.query);
 
             if (!transectionId) {
                 return res.redirect("http://localhost:3000/payment/fail");
@@ -254,6 +257,14 @@ async function run() {
             const { id } = req.params;
             const order = await ordersCollection.findOne({ transectionId: id });
             res.send(order);
+        });
+
+
+        app.get('/orders', async (req, res) => {
+            const query = { email: req.query.email };
+            console.log(query);
+            const orders = await ordersCollection.find(query).toArray();
+            res.send(orders);
         });
 
 
@@ -322,7 +333,7 @@ async function run() {
         });
         // seller products 
         app.get('/sellerorder', async (req, res) => {
-            const query ={email:req.query.email};
+            const query = { email: req.query.email };
             console.log(query);
             const result = await productsCollection.find(query).toArray();
             res.send(result);
