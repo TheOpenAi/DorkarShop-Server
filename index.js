@@ -258,6 +258,12 @@ async function run() {
             const order = await ordersCollection.findOne({ transectionId: id });
             res.send(order);
         });
+        // orders get by email 
+        app.get('/orders',async(req,res)=>{
+            const email = req.query.email;
+            const result = await ordersCollection.find({email: email}).toArray();
+            res.send(result);
+        })
 
 
         app.get('/orders', async (req, res) => {
