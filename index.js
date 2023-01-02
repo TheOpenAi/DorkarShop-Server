@@ -134,9 +134,9 @@ async function run() {
                 total_amount: orderedService.price,
                 currency: 'BDT',
                 tran_id: transectionId, // use unique tran_id for each api call
-                success_url: `http://localhost:5000/payment/success?transectionId=${transectionId}&productsId=${productsId}`,
-                fail_url: `http://localhost:5000/payment/fail?transectionId=${transectionId}`,
-                cancel_url: 'http://localhost:5000/payment/cancel',
+                success_url: `https://dorkar-shop-server-siamcse.vercel.app/payment/success?transectionId=${transectionId}&productsId=${productsId}`,
+                fail_url: `https://dorkar-shop-server-siamcse.vercel.app/payment/fail?transectionId=${transectionId}`,
+                cancel_url: 'https://dorkar-shop-server-siamcse.vercel.app/payment/cancel',
                 ipn_url: 'http://localhost:3030/ipn',
                 shipping_method: 'Courier',
                 product_name: orderedService.model,
@@ -193,7 +193,7 @@ async function run() {
             console.log(req.query);
 
             if (!transectionId) {
-                return res.redirect("http://localhost:3000/payment/fail");
+                return res.redirect("https://dork-shop.web.app/payment/fail");
 
             }
 
@@ -205,7 +205,7 @@ async function run() {
             if (result.modifiedCount > 0) {
 
 
-                res.redirect(`http://localhost:3000/payment/success?transectionId=${transectionId}`)
+                res.redirect(`https://dork-shop.web.app/payment/success?transectionId=${transectionId}`)
 
                 // res.redirect(`http://localhost:3000/`)
 
@@ -230,7 +230,7 @@ async function run() {
 
 
             if (!transectionId) {
-                return res.redirect("http://localhost:3000/payment/fail");
+                return res.redirect("https://dork-shop.web.app/payment/fail");
 
             }
             const result = await ordersCollection.deleteOne({ transectionId });
@@ -238,7 +238,7 @@ async function run() {
             if (result.deletedCount) {
 
 
-                res.redirect("http://localhost:3000/payment/fail");
+                res.redirect("https://dork-shop.web.app/payment/fail");
 
 
 
